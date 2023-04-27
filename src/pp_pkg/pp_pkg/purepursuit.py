@@ -3,6 +3,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist, PoseStamped, Point
 from nav_msgs.msg import Odometry, Path
+import rclpy.qos as qos
 from math import atan2, sqrt
 import numpy as np
 from scipy.interpolate import splprep, splev
@@ -15,7 +16,9 @@ class PurePursuit(Node):
     def __init__(self):
         super().__init__('pure_pursuit')
         self.publisher_ = self.create_publisher(Twist, '/turtlebot4/cmd_vel', 10)
-        self.subscription_odom = self.create_subscription(Odometry, '/turtlebot4/odom', self.odom_callback, 10)
+        self.subscription_odom = self.create_subscription(Odometry, '/turtlebot4/odom', self.odom_callback, 
+                                    qos.QoSProfile(depth=10, reliability=qos.ReliabilityPolicy.BEST_EFFORT))
+        self.subscription_odom
         # Waypoints initialization
         # Point 21 is closest from Point 0
         # Point 1 is furthes from Point 0
@@ -63,8 +66,8 @@ class PurePursuit(Node):
         u_new = np.linspace(u.min(), u.max(), 1000)
         path_x, path_y = splev(u_new, tck)
         # plot reference path and waypoints
-        print(self.waypoints[0])
-        print(self.waypoints[1])
+        print(f"waypoint0: {self.waypoints[0]}")
+        # print(self.waypoints[1])
 
         """
         fig, ax = plt.subplots(figsize=(12,8))
@@ -83,7 +86,8 @@ class PurePursuit(Node):
         # plt.plot(w_x, w_y, 'ro')
         # plt.show()
 
-    def odom_callback(self, msg):
+    def odom_callback(self, msg: Odometry):
+        # self.current_odom = msg
         self.current_pose = msg.pose.pose
         self.get_logger().info(f"pose x: {self.current_pose.position.x}")
         self.get_logger().info(f"pose y: {self.current_pose.position.y}")
@@ -133,7 +137,7 @@ class PurePursuit(Node):
 
         alpha = atan2(ty - self.current_pose.position.y, tx - self.current_pose.position.x) - self.current_pose.orientation.z
         self.get_logger().info(f"angle: {alpha}")
-        self.get_logger().info(f"angle2: {self.current_pose.orientation.z}")
+        self.get_logger().info(f"angle2: {self.current_pose}")
 
         cmd_vel = Twist()
         cmd_vel.linear.x = .5  # tune this value
