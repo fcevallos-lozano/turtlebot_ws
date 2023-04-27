@@ -6,16 +6,16 @@ from nav_msgs.msg import Odometry, Path
 from math import atan2, sqrt
 import numpy as np
 from scipy.interpolate import splprep, splev
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+# import matplotlib.pyplot as plt
+# from matplotlib.animation import FuncAnimation
 
 
 class PurePursuit(Node):
 
     def __init__(self):
         super().__init__('pure_pursuit')
-        self.publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.subscription_odom = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.publisher_ = self.create_publisher(Twist, '/turtlebot4/cmd_vel', 10)
+        self.subscription_odom = self.create_subscription(Odometry, '/turtlebot4/odom', self.odom_callback, 10)
         # Waypoints initialization
         # Point 21 is closest from Point 0
         # Point 1 is furthes from Point 0
@@ -46,7 +46,7 @@ class PurePursuit(Node):
         """
         
         self.lookahead_distance = 4.0
-        self.current_pose = None
+        self.current_pose = Odometry().pose.pose
         self.nearest_index = 0
         self.last_visited_index = None
         self.point_history = [] # history of visited points
@@ -79,9 +79,9 @@ class PurePursuit(Node):
         plt.show()
         exit(1)
         """
-        plt.plot(path_x, path_y)
-        plt.plot(w_x, w_y, 'ro')
-        plt.show()
+        # plt.plot(path_x, path_y)
+        # plt.plot(w_x, w_y, 'ro')
+        # plt.show()
 
     def odom_callback(self, msg):
         self.current_pose = msg.pose.pose

@@ -1,0 +1,4 @@
+source ros2
+source install/local_setup.bash
+makesure env var RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+makesure check that safety override "full" on create 3 web app (192.168.1.26)
