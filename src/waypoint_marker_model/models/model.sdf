@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="waypoint_marker">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <sphere><radius>0.1</radius></sphere>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <sphere><radius>0.1</radius></sphere>
+        </geometry>
+        <material>
+          <ambient>1 0 0 1</ambient>
+          <diffuse>1 0 0 1</diffuse>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
