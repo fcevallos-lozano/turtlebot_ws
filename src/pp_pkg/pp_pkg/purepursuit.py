@@ -6,10 +6,9 @@ from nav_msgs.msg import Odometry, Path
 import rclpy.qos as qos
 from math import atan2, sqrt
 import numpy as np
+from std_msgs.msg import Empty
+from time import time
 from scipy.interpolate import splprep, splev
-# import matplotlib.pyplot as plt
-# from matplotlib.animation import FuncAnimation
-
 
 class PurePursuit(Node):
 
@@ -19,17 +18,29 @@ class PurePursuit(Node):
         self.subscription_odom = self.create_subscription(Odometry, '/turtlebot4/odom', self.odom_callback, 
                                     qos.QoSProfile(depth=10, reliability=qos.ReliabilityPolicy.BEST_EFFORT))
         self.subscription_odom
+        #reset odom
+            # set up node
+        
+        # super().__init__('reset_odom')
+        # # set up the odometry reset publisher
+        # reset_odom = self.create_publisher('/mobile_base/commands/reset_odometry', Empty, 10)
+
+        # # reset odometry (these messages take a few iterations to get through)
+        # timer = time()
+        # while time() - timer < 0.25:
+        #     reset_odom.publish(Empty())
         # Waypoints initialization
         # Point 21 is closest from Point 0
         # Point 1 is furthes from Point 0
-        #self.waypoints =  [Point(x=0.0,y=0.0,z=0.0), Point(x=0.571194595265405, y=-0.4277145118491421, z=0.0), Point(x=1.1417537280142898, y=-0.8531042347260006,z=0.0), Point(x=1.7098876452457967, y=-1.2696346390611464,z=0.0), Point(x=2.2705328851607995, y=-1.6588899151216996,z=0.0), Point(x=2.8121159420106827, y=-1.9791445882187304,z=0.0), Point(x=3.314589274316711, y=-2.159795566252656,z=0.0), Point(x=3.7538316863009027, y=-2.1224619985315876,z=0.0), Point(x=4.112485112342358, y=-1.8323249172947023,z=0.0), Point(x=4.383456805594431, y=-1.3292669972090994,z=0.0), Point(x=4.557386228943757, y=-0.6928302521681386,z=0.0), Point(x=4.617455513800438, y=0.00274597627737883,z=0.0), Point(x=4.55408382321606, y=0.6984486966257434,z=0.0), Point(x=4.376054025556597, y=1.3330664239172116,z=0.0), Point(x=4.096280073621794, y=1.827159263675668,z=0.0), Point(x=3.719737492364894, y=2.097949296701878,z=0.0), Point(x=3.25277928312066, y=2.108933125822431,z=0.0), Point(x=2.7154386886417314, y=1.9004760368018616,z=0.0), Point(x=2.1347012144725985, y=1.552342808106984,z=0.0), Point(x=1.5324590525923942, y=1.134035376721349,z=0.0), Point(x=0.9214084611203568, y=0.6867933269918683,z=0.0), Point(x=0.30732366808208345, y=0.22955002391894264,z=0.0), Point(x=-0.3075127599907512, y=-0.2301742560363831,z=0.0), Point(x=-0.9218413719658775, y=-0.6882173194028102,z=0.0), Point(x=-1.5334674079795052, y=-1.1373288016589413,z=0.0), Point(x=-2.1365993767877467, y=-1.5584414896876835,z=0.0), Point(x=-2.7180981380280307, y=-1.9086314914221845,z=0.0), Point(x=-3.2552809639439704, y=-2.1153141204181285,z=0.0), Point(x=-3.721102967810494, y=-2.0979137913841046,z=0.0), Point(x=-4.096907306768644, y=-1.8206318841755131,z=0.0), Point(x=-4.377088212533404, y=-1.324440752295139,z=0.0), Point(x=-4.555249804461285, y=-0.6910016662308593,z=0.0), Point(x=-4.617336323713965, y=0.003734984720118972,z=0.0), Point(x=-4.555948690867849, y=0.7001491248072772,z=0.0), Point(x=-4.382109193278264, y=1.3376838311365633,z=0.0), Point(x=-4.111620918085742, y=1.8386823176628544,z=0.0), Point(x=-3.7524648889185794, y=2.1224985058331005,z=0.0), Point(x=-3.3123191098095615, y=2.153588702898333,z=0.0), Point(x=-2.80975246649598, y=1.9712114570096653,z=0.0), Point(x=-2.268856462266256, y=1.652958931009528,z=0.0), Point(x=-1.709001159778989, y=1.2664395490411673,z=0.0), Point(x=-1.1413833971013372, y=0.8517589252820573,z=0.0), Point(x=-0.5710732645795573, y=0.4272721367616211,z=0.0)]
+        # self.waypoints =  [Point(x=0.0,y=0.0,z=0.0), Point(x=0.571194595265405, y=-0.4277145118491421, z=0.0), Point(x=1.1417537280142898, y=-0.8531042347260006,z=0.0), Point(x=1.7098876452457967, y=-1.2696346390611464,z=0.0), Point(x=2.2705328851607995, y=-1.6588899151216996,z=0.0), Point(x=2.8121159420106827, y=-1.9791445882187304,z=0.0), Point(x=3.314589274316711, y=-2.159795566252656,z=0.0), Point(x=3.7538316863009027, y=-2.1224619985315876,z=0.0), Point(x=4.112485112342358, y=-1.8323249172947023,z=0.0), Point(x=4.383456805594431, y=-1.3292669972090994,z=0.0), Point(x=4.557386228943757, y=-0.6928302521681386,z=0.0), Point(x=4.617455513800438, y=0.00274597627737883,z=0.0), Point(x=4.55408382321606, y=0.6984486966257434,z=0.0), Point(x=4.376054025556597, y=1.3330664239172116,z=0.0), Point(x=4.096280073621794, y=1.827159263675668,z=0.0), Point(x=3.719737492364894, y=2.097949296701878,z=0.0), Point(x=3.25277928312066, y=2.108933125822431,z=0.0), Point(x=2.7154386886417314, y=1.9004760368018616,z=0.0), Point(x=2.1347012144725985, y=1.552342808106984,z=0.0), Point(x=1.5324590525923942, y=1.134035376721349,z=0.0), Point(x=0.9214084611203568, y=0.6867933269918683,z=0.0), Point(x=0.30732366808208345, y=0.22955002391894264,z=0.0), Point(x=-0.3075127599907512, y=-0.2301742560363831,z=0.0), Point(x=-0.9218413719658775, y=-0.6882173194028102,z=0.0), Point(x=-1.5334674079795052, y=-1.1373288016589413,z=0.0), Point(x=-2.1365993767877467, y=-1.5584414896876835,z=0.0), Point(x=-2.7180981380280307, y=-1.9086314914221845,z=0.0), Point(x=-3.2552809639439704, y=-2.1153141204181285,z=0.0), Point(x=-3.721102967810494, y=-2.0979137913841046,z=0.0), Point(x=-4.096907306768644, y=-1.8206318841755131,z=0.0), Point(x=-4.377088212533404, y=-1.324440752295139,z=0.0), Point(x=-4.555249804461285, y=-0.6910016662308593,z=0.0), Point(x=-4.617336323713965, y=0.003734984720118972,z=0.0), Point(x=-4.555948690867849, y=0.7001491248072772,z=0.0), Point(x=-4.382109193278264, y=1.3376838311365633,z=0.0), Point(x=-4.111620918085742, y=1.8386823176628544,z=0.0), Point(x=-3.7524648889185794, y=2.1224985058331005,z=0.0), Point(x=-3.3123191098095615, y=2.153588702898333,z=0.0), Point(x=-2.80975246649598, y=1.9712114570096653,z=0.0), Point(x=-2.268856462266256, y=1.652958931009528,z=0.0), Point(x=-1.709001159778989, y=1.2664395490411673,z=0.0), Point(x=-1.1413833971013372, y=0.8517589252820573,z=0.0), Point(x=-0.5710732645795573, y=0.4272721367616211,z=0.0)]
         num_points = 50
-        x_values = np.linspace(0, 20, num_points)
-        y_values = 10 * np.sin(np.pi * x_values / 5)
+        x_values = np.linspace(0, 1, num_points)
+        y_values = 0.5 * np.sin(np.pi * x_values)
 
         waypoints_sine_wave = [Point(x=x_values[i], y=y_values[i], z=0.0) for i in range(num_points)]
 
         self.waypoints = waypoints_sine_wave
+
         """
         For printing out closest points to Point 0
 
@@ -48,7 +59,7 @@ class PurePursuit(Node):
         print(f"42: {d_42}")
         """
         
-        self.lookahead_distance = 4.0
+        self.lookahead_distance = 0.08
         self.current_pose = Odometry().pose.pose
         self.nearest_index = 0
         self.last_visited_index = None
@@ -99,6 +110,7 @@ class PurePursuit(Node):
            # nearest_index = 0
         w_x = [wp.x for wp in self.waypoints]
         w_y = [wp.y for wp in self.waypoints]
+        self.passed_values = []
 
         if self.last_visited_index is None:
             dx = [self.current_pose.position.x - icx for icx in w_x] #list comprehension implied by brackets
@@ -113,7 +125,7 @@ class PurePursuit(Node):
             while True: #keep looping until you find a waypoint that has a smaller distance than the current waypoint
                 distance_next_index = self.__distance(self.current_pose.position.x,
                                                   self.current_pose.position.y, w_x[ind+1], w_y[ind+1])
-                if distance_this_index < distance_next_index:
+                if distance_this_index < distance_next_index and ind not in self.passed_values:
                     break
                 ind = ind + 1 if (ind + 1) < len(w_x) else ind
                 distance_this_index = distance_next_index
@@ -123,7 +135,7 @@ class PurePursuit(Node):
 
         # search look ahead target point index
         while Lf > self.__distance(self.current_pose.position.x, self.current_pose.position.y, w_x[ind], w_y[ind]):
-            if (ind + 1) >= len(w_x):
+            if (ind + 1) >= len(w_x) and ind not in self.passed_values:
                 break  # not exceed goal
             ind += 1
         self.get_logger().info(f"lookahead: {ind}")
@@ -140,8 +152,8 @@ class PurePursuit(Node):
         self.get_logger().info(f"angle2: {self.current_pose}")
 
         cmd_vel = Twist()
-        cmd_vel.linear.x = .5  # tune this value
-        cmd_vel.angular.z = 1.2 * alpha  # tune this value
+        cmd_vel.linear.x = .1  # tune this value
+        cmd_vel.angular.z = 1.1 * alpha  # tune this value
 
             # check if the robot is close to the final waypoint
         final_waypoint = self.waypoints[-1]
