@@ -52,7 +52,6 @@ class PurePursuit(Node):
         print(self.waypoints[0])
         print(self.waypoints[1])
 
-
         plt.plot(path_x, path_y)
         plt.plot(w_x, w_y, 'ro')
         plt.show()
@@ -60,6 +59,8 @@ class PurePursuit(Node):
         self.distance_errors = []
         self.distance_error_time_stamps = []
         self.start_time = time.time()
+        self.xstuff = []
+        self.ystuff = []
         # self.current_state = None
 
 
@@ -88,6 +89,9 @@ class PurePursuit(Node):
 
     def odom_callback(self, msg):
         self.current_pose = msg.pose.pose
+        self.xstuff.append(self.current_pose.position.x)
+        self.ystuff.append(self.current_pose.position.y)
+
         self.orientation = msg.pose.pose.orientation 
         #self.current_state = [self.current_pose.position.x, self.current_pose.position.y, self.current_pose.orientation.z]
         #self.get_logger().info(f"pose x: {self.current_pose.position.x}")
@@ -116,6 +120,11 @@ class PurePursuit(Node):
             cmd_vel.linear.x = 0.0
             cmd_vel.angular.z = 0.0
             self.publisher_.publish(cmd_vel)
+            plt.figure()
+            plt.plot(self.true_path[0], self.true_path[1])
+            plt.plot(self.xstuff, self.ystuff, 'r--')
+            plt.show()
+            plt.figure()
             plt.plot(self.distance_error_time_stamps, self.distance_errors)  # Plot the waypoints
             plt.grid()
             plt.show()
@@ -229,7 +238,7 @@ if __name__ == '__main__':
 #         self.current_state = np.zeros(3)  # Current state of the robot
 
 #         self.current_waypoint_idx = 0  # Index of the current waypoint
-#         num_points = 100  # Number of points in the sine wave path
+#         num_points = 50  # Number of points in the sine wave path
 #         x_values = np.linspace(0, 2.5, num_points)  # X values for the sine wave
 #         y_values = 0.625 * np.sin(np.pi * x_values / 1.25)  # Y values for the sine wave
 #         waypoints_sine_wave = [Point(x=x_values[i], y=y_values[i], z=0.0) for i in range(num_points)]  # Create waypoints as Point objects
@@ -248,6 +257,8 @@ if __name__ == '__main__':
 #         self.distance_errors = []
 #         self.distance_error_time_stamps = []
 #         self.start_time = time.time()
+#         self.xstuff = []
+#         self.ystuff = []
 
 
 #     def calculate_distance_error(self):
@@ -280,6 +291,8 @@ if __name__ == '__main__':
 #         self.current_state[0] = position.x  # Update the current X position
 #         self.current_state[1] = position.y  # Update the current Y position
 #         self.current_state[2] = 2 * np.arctan2(orientation.z, orientation.w)  # Convert quaternion to yaw and update the current yaw
+#         self.xstuff.append(position.x)
+#         self.ystuff.append(position.y)
 
 #         self.timer = self.create_timer(self.time_step, self.calculate_distance_error)
 #         optimal_control = self.calculate_optimal_control()  # Calculate the optimal control input
@@ -295,7 +308,7 @@ if __name__ == '__main__':
 #         next_waypoint = self.waypoints[self.current_waypoint_idx]  # Get the next waypoint
 #         position_error = np.linalg.norm(self.current_state[:2] - np.array([next_waypoint.x, next_waypoint.y]))  # Calculate the position error
 
-#         if position_error < 0.05:  # If the position error is below the threshold
+#         if position_error < 0.08:  # If the position error is below the threshold
 #             self.current_waypoint_idx += 1  # Move on to the next waypoint
 #             if self.current_waypoint_idx >= len(self.waypoints):  # If the last waypoint is reached
 #                 self.get_logger().info('Reached the last waypoint. Stopping the robot.')  # Log that the last waypoint is reached
@@ -303,6 +316,11 @@ if __name__ == '__main__':
 #                 cmd_vel.linear.x = 0.0  # Set linear velocity to 0
 #                 cmd_vel.angular.z = 0.0  # Set angular velocity to 0
 #                 self.publisher_.publish(cmd_vel)  # Publish the stop command
+#                 plt.figure()
+#                 plt.plot(self.true_path[0], self.true_path[1])  # Plot the interpolated path
+#                 plt.plot(self.xstuff, self.ystuff, 'r--')  # Plot the waypoints
+#                 plt.show()  # Show the plot
+#                 plt.figure()
 #                 plt.plot(self.distance_error_time_stamps, self.distance_errors)  # Plot the waypoints
 #                 plt.grid()
 #                 plt.show()  # Show the plot
@@ -335,7 +353,7 @@ if __name__ == '__main__':
 
 #                 # Check if the robot is close to the current waypoint and move on to the next waypoint
 #                 position_error = np.linalg.norm(x[:2] - x_ref_i[:2])  # Calculate the position error
-#                 if position_error < 0.1 and waypoint_idx < len(self.waypoints) - 1:  # If the error is below the threshold and not the last waypoint
+#                 if position_error < 0.08 and waypoint_idx < len(self.waypoints) - 1:  # If the error is below the threshold and not the last waypoint
 #                     waypoint_idx += 1  # Move on to the next waypoint
 
 #             for i in range(self.Nc - 1):  # For each step in the control horizon
